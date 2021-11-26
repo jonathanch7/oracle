@@ -1,12 +1,17 @@
 package oracle
 
 import (
-	"gorm.io/gorm/schema"
 	"strings"
+
+	"gorm.io/gorm/schema"
 )
 
 type Namer struct {
 	schema.NamingStrategy
+}
+
+func NewNamer(namingStrategy schema.NamingStrategy) Namer {
+	return Namer{namingStrategy}
 }
 
 func ConvertNameToFormat(x string) string {

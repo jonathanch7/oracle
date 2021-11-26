@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm/clause"
 	gormSchema "gorm.io/gorm/schema"
 
-	"github.com/cengsin/oracle/clauses"
+	"github.com/jonathanch7/oracle/clauses"
 )
 
 func Create(db *gorm.DB) {
@@ -24,7 +24,6 @@ func Create(db *gorm.DB) {
 	}
 
 	hasDefaultValues := len(schema.FieldsWithDefaultDBValue) > 0
-
 	if !stmt.Unscoped {
 		for _, c := range schema.CreateClauses {
 			stmt.AddClause(c)
@@ -80,6 +79,7 @@ func Create(db *gorm.DB) {
 					}).([]clause.Column),
 				})
 			}
+
 			stmt.Build("INSERT", "VALUES", "RETURNING")
 			if hasDefaultValues {
 				stmt.WriteString(" INTO ")

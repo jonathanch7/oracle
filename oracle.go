@@ -3,10 +3,11 @@ package oracle
 import (
 	"database/sql"
 	"fmt"
-	"gorm.io/gorm/utils"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"gorm.io/gorm/utils"
 
 	_ "github.com/godror/godror"
 	"github.com/thoas/go-funk"
@@ -46,11 +47,17 @@ func (d Dialector) Name() string {
 }
 
 func (d Dialector) Initialize(db *gorm.DB) (err error) {
-	db.NamingStrategy = Namer{}
+	namer := Namer{}
+	if db.NamingStrategy != nil {
+		if actualNS, ok := db.NamingStrategy.(schema.NamingStrategy); ok {
+			namer = NewNamer(actualNS)
+		}
+	}
+	db.NamingStrategy = namer
 	d.DefaultStringSize = 1024
 
 	// register callbacks
-	callbacks.RegisterDefaultCallbacks(db, &callbacks.Config{WithReturning: true})
+	callbacks.RegisterDefaultCallbacks(db, &callbacks.Config{})
 
 	d.DriverName = "godror"
 
@@ -58,6 +65,9 @@ func (d Dialector) Initialize(db *gorm.DB) (err error) {
 		db.ConnPool = d.Conn
 	} else {
 		db.ConnPool, err = sql.Open(d.DriverName, d.DSN)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err = db.Callback().Create().Replace("gorm:create", Create); err != nil {
