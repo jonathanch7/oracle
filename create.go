@@ -31,6 +31,10 @@ func Create(db *gorm.DB) {
 	}
 
 	if stmt.SQL.String() == "" {
+		if db.NamingStrategy != nil {
+			stmt.Table = db.NamingStrategy.TableName(stmt.Table)
+		}
+		
 		values := callbacks.ConvertToCreateValues(stmt)
 		onConflict, hasConflict := stmt.Clauses["ON CONFLICT"].Expression.(clause.OnConflict)
 		// are all columns in value the primary fields in schema only?
