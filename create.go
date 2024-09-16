@@ -34,7 +34,7 @@ func Create(db *gorm.DB) {
 		if db.NamingStrategy != nil {
 			stmt.Table = db.NamingStrategy.TableName(stmt.Table)
 		}
-		
+
 		values := callbacks.ConvertToCreateValues(stmt)
 		onConflict, hasConflict := stmt.Clauses["ON CONFLICT"].Expression.(clause.OnConflict)
 		// are all columns in value the primary fields in schema only?
@@ -138,7 +138,7 @@ func Create(db *gorm.DB) {
 							func(field *gormSchema.Field) {
 								switch insertTo.Kind() {
 								case reflect.Struct:
-									if err = field.Set(insertTo, stmt.Vars[boundVars[field.Name]].(sql.Out).Dest); err != nil {
+									if err = field.Set(stmt.Context, insertTo, stmt.Vars[boundVars[field.Name]].(sql.Out).Dest); err != nil {
 										db.AddError(err)
 									}
 								case reflect.Map:
